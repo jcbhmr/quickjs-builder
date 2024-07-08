@@ -1,0 +1,83 @@
+name: gh release create
+on:
+  workflow_dispatch:
+    inputs:
+      draft:
+        description: ""
+        type: boolean
+        default: false
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+jobs:
+  cmake-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            target: x86_64-linux-musl
+          - os: ubuntu-latest
+            target: aarch64-linux-musl
+          - os: macos-13
+            target: x86_64-macos-none
+          - os: macos-latest
+            target: aarch64-macos-none
+          - os: windows-latest
+            target: x86_64-windows-gnu
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: goto-bus-stop/setup-zig@v2
+      - uses: jwlawson/actions-setup-cmake@v2
+      - run: cmake -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TOOLCHAIN_FILE" -B build
+        working-directory: quickjs
+        env:
+          CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/zig-cmake-toolchains/zig-toolchain-${{ matrix.target }}.cmake
+      - run: cmake --build build
+        working-directory: quickjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quickjs-${{ matrix.target }}
+          path: |
+            quickjs/build/libqjs.a
+            quickjs/build/libqjs.lib
+  get-version:
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: cat
+        run: |
+          version=$(cat VERSION)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+  gh-release-create:
+    needs: [cmake-build, get-version]
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+      - shell: bash -ex {0}
+        run: |
+          for f in *; do
+            if [[ $f == *windows* ]]; then
+              wd="$PWD"
+              (cd "$f" && zip -r "$wd/$f.zip" .)
+            else
+              wd="$PWD"
+              (cd "$f" && tar -czf "$wd/$f.tar.gz" .)
+            fi
+          done
+      - run: |
+          gh release create \
+            "v$VERSION" \
+            $DRAFT_FLAG \
+            --generate-notes \
+            *.tar.gz *.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.get-version.outputs.version }}
+          DRAFT_FLAG: ${{ (inputs.draft && '--draft') || '' }}
