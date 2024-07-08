@@ -1,0 +1,34 @@
+name: cmake --build
+on:
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - .gitignore
+      - LICENSE
+      - README.md
+      - .github/**
+      - "!.github/workflows/cmake-build.yml"
+  pull_request:
+    paths-ignore:
+      - .gitignore
+      - LICENSE
+      - README.md
+      - .github/**
+      - "!.github/workflows/cmake-build.yml"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  cmake-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            target: 
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: goto-bus-stop/setup-zig@v2
+      - uses: jwlawson/actions-setup-cmake@v2
+    
