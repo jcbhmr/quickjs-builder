@@ -33,10 +33,10 @@ jobs:
           submodules: recursive
       - uses: goto-bus-stop/setup-zig@v2
       - uses: jwlawson/actions-setup-cmake@v2
-      - run: |
-          cmake -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TOOLCHAIN_FILE" -B build
-          cmake --build build
+      - run: cmake -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TOOLCHAIN_FILE" -B build
         working-directory: quickjs
         env:
           CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/zig-cmake-toolchains/zig-toolchain-${{ matrix.target }}.cmake
+      - run: cmake --build build
+        working-directory: quickjs
     
