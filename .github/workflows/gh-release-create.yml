@@ -12,25 +12,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-20.04
-            target: x86_64-linux-musl
-          - os: ubuntu-latest
-            target: aarch64-linux-musl
-          - os: macos-13
-            target: x86_64-macos-none
-          - os: macos-latest
-            target: aarch64-macos-none
-          - os: windows-latest
-            target: x86_64-windows-gnu
-    runs-on: ${{ matrix.os }}
+        target:
+          - x86_64-linux-musl
+          - aarch64-linux-musl
+          - x86_64-macos-none
+          - aarch64-macos-none
+          - x86_64-windows-gnu
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
       - uses: goto-bus-stop/setup-zig@v2
       - uses: jwlawson/actions-setup-cmake@v2
-      - run: cmake -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TOOLCHAIN_FILE" -B build
+      - shell: bash
+        run: cmake -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TOOLCHAIN_FILE" -B build
         working-directory: quickjs
         env:
           CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/zig-cmake-toolchains/zig-toolchain-${{ matrix.target }}.cmake
@@ -40,8 +36,8 @@ jobs:
         with:
           name: quickjs-${{ matrix.target }}
           path: |
-            quickjs/build/libqjs.a
-            quickjs/build/libqjs.lib
+            quickjs/build/**/libqjs.a
+            quickjs/build/**/qjs.lib
   get-version:
     outputs:
       version: ${{ steps.get-version.outputs.version }}
