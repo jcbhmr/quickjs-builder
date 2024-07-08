@@ -25,10 +25,16 @@ jobs:
       matrix:
         include:
           - os: ubuntu-20.04
-            target: 
+            target: x86_64-linux-gnu
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: goto-bus-stop/setup-zig@v2
       - uses: jwlawson/actions-setup-cmake@v2
+      - run: cmake -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TOOLCHAIN_FILE" -B build
+        working-directory: quickjs
+        env:
+          CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/zig-toolchain-${{ matrix.target }}.cmake
     
