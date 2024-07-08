@@ -38,5 +38,5 @@ jobs:
           cmake --build build
         working-directory: quickjs
         env:
-          CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/zig-toolchain-${{ matrix.target }}.cmake
+          CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/zig-cmake-toolchains/zig-toolchain-${{ matrix.target }}.cmake
     
