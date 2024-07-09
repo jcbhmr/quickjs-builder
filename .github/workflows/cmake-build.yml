@@ -42,13 +42,15 @@ jobs:
           submodules: recursive
       - uses: mozilla-actions/sccache-action@v0.0.5
       - uses: jwlawson/actions-setup-cmake@v2
-      - run: cmake ${{ (runner.os == 'Windows' && '-G Ninja ') || '' }} -B build
+      - run: cmake -B build
         working-directory: quickjs
-      - run: cmake --build build
+      # QuickJS-ng default passed to MSVC tool.
+      - run: cmake --build build --config release
         working-directory: quickjs
-      - run: cmake --install build --prefix ~/package/stage
+      # Prefer CPack but QuickJS-ng doesn't use CPack.
+      - run: cmake --install build --prefix stage
         working-directory: quickjs
       - uses: actions/upload-artifact@v4
         with:
           name: quickjs-${{ matrix.target }}
-          path: ~/package/stage
+          path: quickjs/stage
