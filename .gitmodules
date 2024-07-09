@@ -1,6 +1,3 @@
 [submodule "quickjs"]
 	path = quickjs
 	url = https://github.com/quickjs-ng/quickjs.git
-[submodule "zig-cmake-toolchains"]
-	path = zig-cmake-toolchains
-	url = https://github.com/starofrainnight/zig-cmake-toolchains.git
