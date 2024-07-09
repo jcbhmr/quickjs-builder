@@ -42,7 +42,9 @@ jobs:
           submodules: recursive
       - uses: jwlawson/actions-setup-cmake@v2
       - run: cmake -B build
+        working-directory: quickjs
       - run: cmake --build build
+        working-directory: quickjs
       - uses: actions/upload-artifact@v4
         with:
           name: quickjs-${{ matrix.target }}

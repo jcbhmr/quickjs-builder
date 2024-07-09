@@ -7,17 +7,17 @@
 ## Usage
 
 ```
-https://github.com/jcbhmr/quickjs-builder/releases/download/$TAG/quickjs-aarch64-macos-none.tar.gz
-https://github.com/jcbhmr/quickjs-builder/releases/download/$TAG/quickjs-x86_64-macos-none.tar.gz
-https://github.com/jcbhmr/quickjs-builder/releases/download/$TAG/quickjs-x86_64-windows-gnu.zip
-https://github.com/jcbhmr/quickjs-builder/releases/download/$TAG/quickjs-aarch64-linux-musl.tar.gz
-https://github.com/jcbhmr/quickjs-builder/releases/download/$TAG/quickjs-x86_64-linux-musl.tar.gz
+https://github.com/jcbhmr/quickjs-builder/releases/download/$TAG/quickjs-aarch64-apple-darwin.tar.gz
+https://github.com/jcbhmr/quickjs-builder/releases/download/$TAG/quickjs-x86_64-apple-darwin.tar.gz
+https://github.com/jcbhmr/quickjs-builder/releases/download/$TAG/quickjs-x86_64-pc-windows-msvc.zip
+https://github.com/jcbhmr/quickjs-builder/releases/download/$TAG/quickjs-x86_64-unknown-linux-gnu.tar.gz
 ```
 
 ## Development
 
+<sub>`cd quickjs`</sub>
+
 ```sh
-cd quickjs
 cmake -B build
 cmake --build build
 ```
