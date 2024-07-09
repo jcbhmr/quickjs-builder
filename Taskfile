@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -ex
+
+build() {
+    (
+        cd quickjs
+        rm -rf build
+        if [ "$OS" = "Windows_NT" ]; then
+            cmake -B build
+        else
+            TARGET_SYS="$1" cmake -DCMAKE_TOOLCHAIN_FILE="$PWD/../cmake/zig-toolchain.cmake" -B build
+        fi
+        cmake --build build
+    )
+
+    rm -rf dist
+    mkdir dist
+    cp quickjs/quickjs.h dist
+    if [ "$OS" = "Windows_NT" ]; then
+        cp quickjs/build/{,**/}qjs.lib dist
+    else
+        cp quickjs/build/{,**/}libqjs.a dist
+    fi
+}
+
+exec "$@"

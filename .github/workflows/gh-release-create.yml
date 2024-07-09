@@ -9,35 +9,7 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   cmake-build:
-    strategy:
-      fail-fast: false
-      matrix:
-        target:
-          - x86_64-linux-musl
-          - aarch64-linux-musl
-          - x86_64-macos-none
-          - aarch64-macos-none
-          - x86_64-windows-gnu
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - uses: goto-bus-stop/setup-zig@v2
-      - uses: jwlawson/actions-setup-cmake@v2
-      - shell: bash
-        run: cmake -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TOOLCHAIN_FILE" -B build
-        working-directory: quickjs
-        env:
-          CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/zig-cmake-toolchains/zig-toolchain-${{ matrix.target }}.cmake
-      - run: cmake --build build
-        working-directory: quickjs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: quickjs-${{ matrix.target }}
-          path: |
-            quickjs/build/**/libqjs.a
-            quickjs/build/**/qjs.lib
+    uses: ./.github/workflows/cmake-build.yml
   get-version:
     outputs:
       version: ${{ steps.get-version.outputs.version }}

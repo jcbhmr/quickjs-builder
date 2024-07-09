@@ -15,8 +15,11 @@ on:
       - README.md
       - .github/**
       - "!.github/workflows/cmake-build.yml"
+  workflow_call:
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # When run via `workflow_call` the `github.workflow` and `github.ref` are the
+  # same as the parent so we need a differentiation suffix.
+  group: ${{ github.workflow }}-${{ github.ref }}-cmake-build
   cancel-in-progress: true
 jobs:
   cmake-build:
@@ -28,7 +31,7 @@ jobs:
           - aarch64-linux-musl
           - x86_64-macos-none
           - aarch64-macos-none
-          - x86_64-windows-gnu
+          # - x86_64-windows-gnu
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,10 +40,27 @@ jobs:
       - uses: goto-bus-stop/setup-zig@v2
       - uses: jwlawson/actions-setup-cmake@v2
       - shell: bash
-        run: cmake -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TOOLCHAIN_FILE" -B build
-        working-directory: quickjs
+        run: ./Taskfile build "$TARGET"
         env:
-          CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/zig-cmake-toolchains/zig-toolchain-${{ matrix.target }}.cmake
+          TARGET: ${{ matrix.target }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quickjs-${{ matrix.target }}
+          path: |
+            quickjs/build/**/libqjs.a
+            quickjs/build/**/qjs.lib
+  cmake-build-x86_64-windows-msvc:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: jwlawson/actions-setup-cmake@v2
+      - run: cmake -B build
+        working-directory: quickjs
       - run: cmake --build build
         working-directory: quickjs
-    
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quickjs-x86_64-windows-msvc
+          path: quickjs/build/**/qjs.lib
