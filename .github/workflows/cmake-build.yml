@@ -42,17 +42,13 @@ jobs:
           submodules: recursive
       - uses: mozilla-actions/sccache-action@v0.0.5
       - uses: jwlawson/actions-setup-cmake@v2
-      - if: runner.os != 'Windows'
-        run: cmake -B build
-        working-directory: quickjs
-      - if: runner.os == 'Windows'
-        run: cmake -G Ninja -B build
+      - run: cmake ${{ (runner.os == 'Windows' && '-G Ninja ') || '' }} -B build
         working-directory: quickjs
       - run: cmake --build build
         working-directory: quickjs
-      - run: cmake --install build --prefix stage
+      - run: cmake --install build --prefix ~/package/stage
         working-directory: quickjs
       - uses: actions/upload-artifact@v4
         with:
           name: quickjs-${{ matrix.target }}
-          path: quickjs/stage
+          path: ~/package/stage
