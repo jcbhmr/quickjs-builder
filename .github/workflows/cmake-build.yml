@@ -27,11 +27,11 @@ jobs:
       fail-fast: false
       matrix:
         target:
-          - x86_64-linux-musl
-          - aarch64-linux-musl
-          - x86_64-macos-none
-          - aarch64-macos-none
-          # - x86_64-windows-gnu
+          - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-musl
+          - x86_64-unknown-macos-none
+          - aarch64-unknown-macos-none
+          # - x86_64-unknown-windows-gnu
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
       - uses: goto-bus-stop/setup-zig@v2
       - uses: jwlawson/actions-setup-cmake@v2
       - shell: bash
-        run: ./Taskfile build "$TARGET"
+        run: ./task.cmake build "$TARGET"
         env:
           TARGET: ${{ matrix.target }}
       - uses: actions/upload-artifact@v4
@@ -49,18 +49,20 @@ jobs:
           path: |
             quickjs/build/**/libqjs.a
             quickjs/build/**/qjs.lib
-  cmake-build-x86_64-windows-msvc:
+  cmake-build-x86_64-pc-windows-msvc:
     runs-on: windows-latest
+    env:
+      target: x86_64-pc-windows-msvc
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
       - uses: jwlawson/actions-setup-cmake@v2
-      - run: cmake -B build
-        working-directory: quickjs
-      - run: cmake --build build
-        working-directory: quickjs
+      - shell: bash
+        run: ./task.cmake build "$TARGET"
+        env:
+          TARGET: ${{ env.target }}
       - uses: actions/upload-artifact@v4
         with:
-          name: quickjs-x86_64-windows-msvc
+          name: quickjs-${{ env.target }}
           path: quickjs/build/**/qjs.lib

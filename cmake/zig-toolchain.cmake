@@ -33,9 +33,11 @@ if(TARGET_SYS AND NOT ZIG_INIT)
   else()
     string(REPLACE "-" ";" TARGETS ${TARGET_SYS})
 
+    # CHANGED! TARGET_SYS=x86_64-linux-musl triple to TARGET_SYS=x86_64-unknown-linux-musl quad
     list(GET TARGETS 0 ARCH)
-    list(GET TARGETS 1 TARGET)
-    list(GET TARGETS 2 LIBC)
+    list(GET TARGETS 1 VENDOR)
+    list(GET TARGETS 2 TARGET)
+    list(GET TARGETS 3 LIBC)
 
     string(SUBSTRING ${TARGET} 0 1 T1)
     string(TOUPPER ${T1} T1)
