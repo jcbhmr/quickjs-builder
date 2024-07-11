@@ -34,16 +34,51 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
           - os: windows-latest
-            target: x86_64-unknown-windows-gnu
+            target: x86_64-unknown-windows-msvc
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: mozilla-actions/sccache-action@v0.0.5
       - uses: jwlawson/actions-setup-cmake@v2
       - run: cmake -B build
         working-directory: quickjs
+      # QuickJS-ng default passed to MSVC tool.
+      - run: cmake --build build --config release
+        working-directory: quickjs
+      # Prefer CPack but QuickJS-ng doesn't use CPack.
+      - run: cmake --install build --prefix stage
+        working-directory: quickjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quickjs-${{ matrix.target }}
+          path: quickjs/stage
+  cmake-build2:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          # - aarch64-apple-darwin
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - i686-pc-windows-gnu
+          - wasm32-wasi-musl # wasm32-wasi TODO: Fix zig-cmake-toolchain to accept 2-part triples
+          # - x86_64-apple-darwin # TODO: Use config.guess or whatever to resolve target triples in zig-cmake-toolchain
+          - x86_64-pc-windows-gnu
+          # - x86_64-unknown-windows-msvc
+          # - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: jwlawson/actions-setup-cmake@v2
+      - uses: goto-bus-stop/setup-zig@v2
+      - run: cmake --toolchain ../cmake/zig-cmake-toolchain/toolchain-zig.cmake -DZIG_TARGET="$TARGET" -B build
+        working-directory: quickjs
+        env:
+          TARGET: ${{ matrix.target }}
       # QuickJS-ng default passed to MSVC tool.
       - run: cmake --build build --config release
         working-directory: quickjs
