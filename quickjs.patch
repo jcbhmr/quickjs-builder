@@ -1,0 +1,49 @@
+diff --git a/.gitignore b/.gitignore
+index fbeb98f..4b97a92 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -6,4 +6,5 @@ build/
+ unicode/
+ test262_*.txt
+ .idea
+-cmake-*
+\ No newline at end of file
++cmake-*
++/stage/
+\ No newline at end of file
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 373bb1f..de517ed 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -164,7 +164,8 @@ if(BUILD_QJS_LIBC)
+ endif()
+ list(APPEND qjs_defines _GNU_SOURCE)
+ if(WIN32)
+-    list(APPEND qjs_defines WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0602)
++    # list(APPEND qjs_defines WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0602)
++    list(APPEND qjs_defines WIN32_LEAN_AND_MEAN)
+ endif()
+ list(APPEND qjs_libs qjs ${CMAKE_DL_LIBS})
+ find_package(Threads)
+diff --git a/cutils.c b/cutils.c
+index 56982df..2e5028d 100644
+--- a/cutils.c
++++ b/cutils.c
+@@ -1127,7 +1127,7 @@ void rqsort(void *base, size_t nmemb, size_t size, cmp_f cmp, void *opaque)
+ 
+ /*---- Portable time functions ----*/
+ 
+-#if defined(_MSC_VER)
++#if WIN32
+  // From: https://stackoverflow.com/a/26085827
+ static int gettimeofday_msvc(struct timeval *tp, struct timezone *tzp)
+ {
+@@ -1182,7 +1182,7 @@ uint64_t js__hrtime_ns(void) {
+ 
+ int64_t js__gettimeofday_us(void) {
+     struct timeval tv;
+-#if defined(_MSC_VER)
++#if WIN32
+     gettimeofday_msvc(&tv, NULL);
+ #else
+     gettimeofday(&tv, NULL);

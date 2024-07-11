@@ -26,48 +26,71 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-20.04
-            target: x86_64-unknown-linux-gnu
-          - os: macos-13
-            target: x86_64-apple-darwin
-          - os: macos-latest
-            target: aarch64-apple-darwin
-          - os: windows-latest
-            target: x86_64-unknown-windows-msvc
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - uses: jwlawson/actions-setup-cmake@v2
-      - run: cmake -B build
-        working-directory: quickjs
-      # QuickJS-ng default passed to MSVC tool.
-      - run: cmake --build build --config release
-        working-directory: quickjs
-      # Prefer CPack but QuickJS-ng doesn't use CPack.
-      - run: cmake --install build --prefix stage
-        working-directory: quickjs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: quickjs-${{ matrix.target }}
-          path: quickjs/stage
-  cmake-build2:
-    strategy:
-      fail-fast: false
-      matrix:
         target:
-          # - aarch64-apple-darwin
-          - aarch64-unknown-linux-gnu
-          - aarch64-unknown-linux-musl
-          - i686-pc-windows-gnu
-          - wasm32-wasi-musl # wasm32-wasi TODO: Fix zig-cmake-toolchain to accept 2-part triples
-          # - x86_64-apple-darwin # TODO: Use config.guess or whatever to resolve target triples in zig-cmake-toolchain
-          - x86_64-pc-windows-gnu
-          # - x86_64-unknown-windows-msvc
-          # - x86_64-unknown-linux-gnu
-          - x86_64-unknown-linux-musl
+          - aarch64_be-linux-gnu
+          - aarch64_be-linux-musl
+          - aarch64_be-windows-gnu
+          - aarch64-linux-gnu
+          - aarch64-linux-musl
+          - aarch64-windows-gnu
+          - aarch64-macos-none
+          - armeb-linux-gnueabi
+          - armeb-linux-gnueabihf
+          - armeb-linux-musleabi
+          - armeb-linux-musleabihf
+          - armeb-windows-gnu
+          - arm-linux-gnueabi
+          - arm-linux-gnueabihf
+          - arm-linux-musleabi
+          - arm-linux-musleabihf
+          - thumb-linux-gnueabi
+          - thumb-linux-gnueabihf
+          - thumb-linux-musleabi
+          - thumb-linux-musleabihf
+          - arm-windows-gnu
+          - csky-linux-gnueabi
+          - csky-linux-gnueabihf
+          - x86-linux-gnu
+          - x86-linux-musl
+          - x86-windows-gnu
+          - loongarch64-linux-gnu
+          - loongarch64-linux-musl
+          - m68k-linux-gnu
+          - m68k-linux-musl
+          - mips64el-linux-gnuabi64
+          - mips64el-linux-gnuabin32
+          - mips64el-linux-musl
+          - mips64-linux-gnuabi64
+          - mips64-linux-gnuabin32
+          - mips64-linux-musl
+          - mipsel-linux-gnueabi
+          - mipsel-linux-gnueabihf
+          - mipsel-linux-musl
+          - mips-linux-gnueabi
+          - mips-linux-gnueabihf
+          - mips-linux-musl
+          - powerpc64le-linux-gnu
+          - powerpc64le-linux-musl
+          - powerpc64-linux-gnu
+          - powerpc64-linux-musl
+          - powerpc-linux-gnueabi
+          - powerpc-linux-gnueabihf
+          - powerpc-linux-musl
+          - riscv32-linux-gnuilp32
+          - riscv32-linux-musl
+          - riscv64-linux-gnu
+          - riscv64-linux-musl
+          - s390x-linux-gnu
+          - s390x-linux-musl
+          - sparc-linux-gnu
+          - sparc64-linux-gnu
+          # - wasm32-freestanding-musl
+          - wasm32-wasi-musl
+          - x86_64-linux-gnu
+          - x86_64-linux-gnux32
+          - x86_64-linux-musl
+          - x86_64-windows-gnu
+          - x86_64-macos-none
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -75,6 +98,7 @@ jobs:
           submodules: recursive
       - uses: jwlawson/actions-setup-cmake@v2
       - uses: goto-bus-stop/setup-zig@v2
+      - run: git -C quickjs apply "$PWD/quickjs.patch"
       - run: cmake --toolchain ../cmake/zig-cmake-toolchain/toolchain-zig.cmake -DZIG_TARGET="$TARGET" -B build
         working-directory: quickjs
         env:
